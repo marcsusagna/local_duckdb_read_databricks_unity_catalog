@@ -1,7 +1,7 @@
 [project]
-name = "local-polars-read-databricks-unity-catalog"
+name = "local-duckdb-read-databricks-unity-catalog"
 version = "0.1.0"
-description = "Example how to use polars locally to query Databricks UC data"
+description = "Example how to use duckdb locally to query Databricks UC data"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [

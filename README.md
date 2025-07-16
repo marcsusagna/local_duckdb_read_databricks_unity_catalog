@@ -24,19 +24,15 @@ This solution is based credential vending, so see [Credential Vending](https://d
 
 Spark 4 has made a major effort to improve interaction with PyArrow better. See here [Spark 4 Arrow](https://spark.apache.org/docs/latest/api/python/tutorial/sql/arrow_pandas).html as well as this method [toArrow](https://spark.apache.org/docs/latest//api/python/reference/pyspark.sql/api/pyspark.sql.DataFrame.toArrow.html) (claimed to be released in Spark 4, even though late spark 3.5 version also include it). 
 
-In parallel, Arrow is gaining popularity to read parquet files from disk directly into memory for any other data processing framework, like Polars or Duckdb. 
+In parallel, Arrow is gaining popularity to read parquet files from disk into memory for any other data processing framework, like Polars or Duckdb. 
 
 ### delta-rs
 
 See [delta-rs](https://github.com/delta-io/delta-rs). This library is facilitating the interaction with a delta lake (Unity Catalog or any other solution for it). It abstracts the complexity to connect, for instance, to Unity Catalog, by leveraging the UC API. 
 
-In particular, in this repository we use pyarrow to bring a delta table into arrow and then load it into polars. Similar can be done for duckdb
+In particular, in this repository we use arrow to bring a delta table into arrow and then load it into duckdb.
 
 # Alternatives to the proposed setup
-
-## Read UC objects directly from polars
-
-Polars is looking into this directly ([Polars UC](https://docs.pola.rs/api/python/stable/reference/catalog/api/polars.Catalog.html#polars.Catalog)) so we don't need to use deltalake library. However, it is marked unstable as of July 2025 and you would be locking yourself into polars, when a local client could be using other tools like duckdb, pandas or daft. I recommend reading this [Delta without spark](https://delta.io/blog/delta-lake-without-spark/) to understand this flexibility .
 
 ## Bypass UC and access cloud storage directly
 
@@ -47,11 +43,9 @@ However, accessing directly storage, apart from the complexity it entails to dea
 
 ## Limitations
 
-Polars has demonstrated to be very fast for small/medium data compared to spark. Moreover, Polars allows to execute in eager or in lazy mode (optimizations). Lazy mode helps performing predicate pushdown and column pruning, which is critical to reduce disk I/O. The issue with this repository is that because we use deltalake library and pyarrow to read the delta table, polars is unable to pass down these optimizations and it is required for the user to specify that smartly when reading the data. 
+Duckdb has demonstrated to be very fast for SQL queries on small/medium data compared to spark. Moreover, DuckDB allows to execute in eager or in lazy mode (optimizations). Lazy mode helps performing predicate pushdown and column pruning, which is critical to reduce disk I/O. The issue with this repository is that because we use deltalake library and pyarrow to read the delta table, duckdb is unable to pass down these optimizations and it is required for the user to specify that smartly when reading the data. 
 
-Probably the development of https://docs.pola.rs/api/python/stable/reference/catalog/api/polars.Catalog.html#polars.Catalog will lead to having that integrated, but at the loss of not having an abstraction for any processing engine like deltalake library does. 
-
-As a consequence, spark might be faster than polars, if the user is not able to specify the partition columns and predicate pushdown, since spark resolves this automatically during the query plan. 
+As a consequence, spark on single node in Databricks might be faster than polars, if the user is not able to specify the partition columns and predicate pushdown, since spark resolves this automatically during the query plan. 
 
 # Value proposition: Why run this locally / out of Databricks?
 
